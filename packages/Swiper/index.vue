@@ -2,8 +2,8 @@
   <div class="swiper" ref="singleWidth" @mousemove.prevent>
     <!--swiper显示页-->
     <div class="swiper_box">
-      <ul class="swiper_list" :style="[width, transfrom]"
-      ref="transition" @mouseenter="ClearTimer"
+      <ul class="swiper_list" :style="[width, transfrom]" 
+      @mouseenter="ClearTimer" ref="transitionCom"
       @mouseleave="SetTimer">
         <li class="swiper_item" v-for="(item,index) in exchange"
         :key="index" :style="{width: slideStyle.width+'px'}"
@@ -102,16 +102,20 @@ const resetStyle = (): void => {
   slideStyle.width = proxy.$refs.singleWidth.offsetWidth;
   slideStyle.totalwidth = slideStyle.width * exchange.value.length;
 };
-onMounted(() => {
+onMounted(async () => {
+  await proxy.$nextTick(() => {
+    console.log(proxy.$refs);
+  });
   resetStyle();
   if (props.options.loop) {
     slideStyle.left = -slideStyle.width;
     slideStyle.selected = 1;
   };
-  if (props.options.autoplay) {
+  if (proxy.$refs.transitionCom && props.options.autoplay) {
     clearInterval(autoplayTimer.value);
     autoplayTimer.value = setInterval(() => {
-      transition(proxy.$refs.transition, 1);
+      console.log(proxy.$refs.transitionCom);
+      transition(proxy.$refs.transitionCom, 1);
     }, props.options.interval);
   };
 });
@@ -136,7 +140,7 @@ const touch: touch = reactive({
   moveAllow: false, // 滑动阈值
   loading: false, // transition 中
 });
-const transition = (el: Element, indexTo: 1 | 0 | -1): void => {
+const transition = (el: any, indexTo: 1 | 0 | -1): void => {
   touch.allow = false;
   touch.loading = true;
   el.classList.add('transition');
@@ -175,7 +179,7 @@ const transition = (el: Element, indexTo: 1 | 0 | -1): void => {
 };
 const AllowFuc = (move: number): void => {
   const indexTo = move > 0 ? -1 : 1;
-  transition(proxy.$refs.transition, indexTo);
+  transition(proxy.$refs.transitionCom, indexTo);
   touch.moveAllow = false;
 };
 const MouseStart = (ev: MouseEvent): void => { // 记录开始位置
@@ -203,7 +207,7 @@ const MouseEnd = (ev: MouseEvent): void => {
   if (touch.moveAllow) {
     AllowFuc(ev.clientX - touch.start);
   } else {
-    transition(proxy.$refs.transition, 0);
+    transition(proxy.$refs.transitionCom, 0);
   }
   touch.start = 0;
   touch.allow = false;
@@ -231,10 +235,10 @@ if (props.options.loop) {
   loopswiper.list.push(props.list[0]);
 };
 const prevItem = () => {
-  (!touch.loading) && transition(proxy.$refs.transition, -1);
+  (!touch.loading) && transition(proxy.$refs.transitionCom, -1);
 };
 const nextItem = () => {
-  (!touch.loading) && transition(proxy.$refs.transition, 1);
+  (!touch.loading) && transition(proxy.$refs.transitionCom, 1);
 };
 // 分页器点击
 const toggle = (index: number) => {
@@ -247,12 +251,12 @@ const toggle = (index: number) => {
     slideStyle.selected = index;
   }
   touch.loading = true;
-  proxy.$refs.transition.classList.add('transition');
+  proxy.$refs.transitionCom.classList.add('transition');
   let timer: any = null;
   setTimeout(() => {
     slideStyle.left = -(slideStyle.width * slideStyle.selected);
     timer = setTimeout(() => {
-      proxy.$refs.transition.classList.remove('transition');
+      proxy.$refs.transitionCom.classList.remove('transition');
       touch.loading = false;
       clearTimeout(timer);
     }, 500)
@@ -272,7 +276,7 @@ watch(() => props.options.autoplay, () => {
   if (props.options.autoplay) {
     clearInterval(autoplayTimer.value);
     autoplayTimer.value = setInterval(() => {
-      transition(proxy.$refs.transition, 1);
+      transition(proxy.$refs.transitionCom, 1);
     }, props.options.interval);
   } else {
     clearInterval(autoplayTimer.value);
@@ -287,7 +291,7 @@ const SetTimer = () => {
   if (props.options.autoplay) {
     clearInterval(autoplayTimer.value);
     autoplayTimer.value = setInterval(() => {
-      transition(proxy.$refs.transition, 1);
+      transition(proxy.$refs.transitionCom, 1);
     }, props.options.interval);
   }
 };

@@ -66,9 +66,15 @@ const target = (ev: any): void =>  { // 事件委托
 };
 const callback = (V: any) => {
   if (options.loop) {
-    console.log(`这是第${V}个图片`);
+    proxy.$message({
+      msg: `这是第${V}个图片`,
+      type: 'success'
+    });
   } else {
-    console.log(`这是第${V+1}个图片`);
+    proxy.$message({
+      msg: `这是第${V+1}个图片`,
+      type: 'success'
+    });
   }
 };
 onMounted(() => {
